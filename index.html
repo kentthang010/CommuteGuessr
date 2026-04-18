@@ -2,6 +2,8 @@
 <html>
 
 <head>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+		integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
 	<link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
 	<link rel="icon" type="image/x-icon" href="assets/favicon.ico">
 	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -11,6 +13,7 @@
 		integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 	<script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
 	<script src="map.js" defer></script>
+	<link rel="stylesheet" href="styles.css">
 	<title>CommuteGuessr</title>
 </head>
 
@@ -19,8 +22,9 @@
 
 		<h1 class="text-3xl font-bold">CommuteGuessr</h1>
 		<p>Guess your commute time!</p>
-		<div class="w-full h-full" id="map">
+		<div class="w-75 h-75" id="map">
 		</div>
+		<button type="button" class="btn btn-primary" onclick="randomizeStart()">Randomize Start</button>
 	</div>
 </body>
 
