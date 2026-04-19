@@ -1,17 +1,60 @@
-var lat = 51.5 + (Math.random() - 0.5) * 0.1;
-var lng = -0.09 + (Math.random() - 0.5) * 0.1;
+// This is terrible, refactor needed in next commit.
+var map;
+var lat = 51.5 + (Math.random()) * 2;
+var lng = -0.09 + (Math.random()) * 2;
 var transportModes = ['routed-car', 'routed-foot', 'routed-bike'];
 var modeoftransport = transportModes[Math.floor(Math.random() * transportModes.length)];
+// var popularCities = [{51.5, -0.09}]
 
-function randomizeStart() {
+function randomizeLocation() {
 	// This function generates a random starting point around a central location (e.g., London)
 	// Later on I want it to not just be around London but also all over the world.
 	// Perhaps, a way to avoid generating points in the ocean is sufficient.
-	lat = 51.5 + (Math.random() - 0.5) * 0.1; // Random latitude around 51.5
-	lng = -0.09 + (Math.random() - 0.5) * 0.1; // Random longitude around -0.09
+	lat = 51.5 + (Math.random() * 2); // Random latitude around 51.5
+	lng = -0.09 + (Math.random() * 2); // Random longitude around -0.09
+
+	map.off();
+	map.remove();
+	map = L.map('map').setView([lat, lng], 13);
+
+	L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+		maxZoom: 19,
+		referrerPolicy: 'origin-when-cross-origin',
+		attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+	}).addTo(map);
+
+	var control = L.Routing.control({
+		containerClassName: 'routing-container',
+		router: L.Routing.osrmv1({
+			// routed-bike, routed-foot and routed-car services do
+			serviceUrl: 'https://routing.openstreetmap.de/' + modeoftransport + '/route/v1',
+		}),
+		// these need to be randomized too
+		waypoints: [
+			L.latLng(lat + (Math.random() * 0.1), lng + (Math.random() * 0.1)),
+			L.latLng(lat + (Math.random() * 0.1), lng + (Math.random() * 0.1))
+		],
+		routeWhileDragging: true
+	}).addTo(map);
+
+	// Capture the travel time
+	control.on('routesfound', function (e) {
+		var routes = e.routes;
+		var summary = routes[0].summary;
+		// Trying to solve the ocena problem but this is not
+		// exhaustive.
+		if (summary.totalTime === 0) {
+			console.log('No route found, trying again...');
+			randomizeLocation();
+		}
+		var timeInMinutes = Math.round(summary.totalTime / 60);
+		console.log('Travel time: ' + timeInMinutes + ' minutes');
+		console.log('latitude: ' + lat + ' longitude: ' + lng);
+	});
 }
 
-var map = L.map('map').setView([lat, lng], 13);
+map = L.map('map').setView([lat, lng], 13);
+
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 	maxZoom: 19,
 	referrerPolicy: 'origin-when-cross-origin',
@@ -38,6 +81,6 @@ control.on('routesfound', function (e) {
 	// summary.totalTime gives time in seconds
 	var timeInMinutes = Math.round(summary.totalTime / 60);
 	console.log('Travel time: ' + timeInMinutes + ' minutes');
+	console.log('latitude: ' + lat + ' longitude: ' + lng);
 });
 
-// var marker = L.marker([51.5, -0.09]).addTo(map);
