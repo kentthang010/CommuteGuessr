@@ -5,16 +5,14 @@ map.setView([getRandomLatitude(), getRandomLongitude()], 13);
 // Sets the tile layer for the map using OpenStreetMap tiles
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 	maxZoom: 19,
-	referrerPolicy: 'origin-when-cross-origin',
+	referrerPolicy: 'strict-origin-when-cross-origin',
 	attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 }).addTo(map);
 
 // Sets up the routing control using Leaflet Routing Machine and OSRM
 var control = L.Routing.control({
 	containerClassName: 'routing-container',
-	router: L.Routing.osrmv1({
-		serviceUrl: 'https://routing.openstreetmap.de/' + getRandomTransportMode() + '/route/v1',
-	}),
+	router: L.Routing.osrmv1(),
 	routeWhileDragging: true
 }).addTo(map);
 
@@ -24,7 +22,7 @@ var routeTimeInMinutes;
 control.on('routesfound', function (e) {
 	var routes = e.routes;
 	var summary = routes[0].summary;
-	// Trying to solve the ocena problem but this is not
+	// Trying to solve the ocean problem but this is not
 	// exhaustive.
 	if (summary.totalTime === 0) {
 		console.log('No route found, trying again...');
@@ -46,6 +44,10 @@ function randomizeLocation() {
 		L.latLng(getRandomLatitude() + (Math.random() * 0.1), getRandomLongitude() + (Math.random() * 0.1)),
 		L.latLng(getRandomLatitude() + (Math.random() * 0.1), getRandomLongitude() + (Math.random() * 0.1))
 	]);
+
+	control.getRouter().options.serviceUrl = 'https://routing.openstreetmap.de/' + getRandomTransportMode() + '/route/v1';
+
+	control.route();
 }
 
 // This function will be called when the user submits their guess for the travel time.
@@ -94,8 +96,15 @@ function nextRound() {
 // routed-bike, routed-foot and routed-car services
 function getRandomTransportMode() {
 	var transportModes = ['routed-car', 'routed-foot', 'routed-bike'];
-	modeoftransport = transportModes[Math.floor(Math.random() * transportModes.length)];
-	return modeoftransport;
+	var transportModeEmojis = {
+		'routed-car': " Driving 🚗",
+		'routed-foot': " Walking 🚶",
+		'routed-bike': " Biking 🚴‍♂️",
+	};
+	modeOfTransport = transportModes[Math.floor(Math.random() * transportModes.length)];
+	console.log(transportModeEmojis[modeOfTransport]);
+	document.getElementById("transportmodeimgid").innerText = "Mode of transport: " + transportModeEmojis[modeOfTransport];
+	return modeOfTransport;
 }
 
 function getRandomLatitude() {
