@@ -1,6 +1,7 @@
 // Initialize map
 var map = L.map('map');
 map.setView([getRandomLatitude(), getRandomLongitude()], 13);
+
 // Sets the tile layer for the map using OpenStreetMap tiles
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 	maxZoom: 19,
@@ -17,6 +18,8 @@ var control = L.Routing.control({
 	routeWhileDragging: true
 }).addTo(map);
 
+var routeTimeInMinutes;
+
 // Capture the travel time
 control.on('routesfound', function (e) {
 	var routes = e.routes;
@@ -27,8 +30,8 @@ control.on('routesfound', function (e) {
 		console.log('No route found, trying again...');
 		randomizeLocation();
 	}
-	var timeInMinutes = Math.round(summary.totalTime / 60);
-	console.log('Travel time: ' + timeInMinutes + ' minutes');
+	routeTimeInMinutes = Math.round(summary.totalTime / 60);
+	console.log('Travel time: ' + routeTimeInMinutes + ' minutes');
 });
 
 randomizeLocation();
@@ -43,6 +46,49 @@ function randomizeLocation() {
 		L.latLng(getRandomLatitude() + (Math.random() * 0.1), getRandomLongitude() + (Math.random() * 0.1)),
 		L.latLng(getRandomLatitude() + (Math.random() * 0.1), getRandomLongitude() + (Math.random() * 0.1))
 	]);
+}
+
+// This function will be called when the user submits their guess for the travel time.
+// It will compare the user's guess with the actual travel time and provide feedback.
+const maxPoints = 5000;
+var form = document.getElementById('guessForm');
+form.addEventListener('submit', (event) => {
+	event.preventDefault();
+
+	var userGuess = parseInt(document.getElementById('guessH').value) * 60 + parseInt(document.getElementById('guessM').value);
+	// 5000 is max points for a guess
+	var score = maxPoints * (1 - Math.abs(userGuess - routeTimeInMinutes) / routeTimeInMinutes);
+	score = Math.floor(Math.max(0, score));
+
+	var guessDistance = Math.abs(routeTimeInMinutes - userGuess);
+	if (guessDistance >= 60) {
+		var formattedGuessDistance = "You were " + Math.floor(guessDistance / 60) + " hours and " + guessDistance % 60 + " minutes away!";
+		displayScore(score, formattedGuessDistance);
+	}
+	else {
+		var formattedGuessDistance = "You were " + guessDistance + " minutes away!";
+		displayScore(score, formattedGuessDistance);
+	}
+})
+
+function displayScore(score, guessDistance) {
+	// Display the score
+	console.log(score);
+	document.getElementsByClassName('routing-container')[0].style.display = "block";
+	document.getElementById('scoreDisplay').style.display = "flex";
+	document.getElementById('scoreText').innerText = "You scored " + score + " points!";
+	document.getElementById('guessDistanceText').innerText = guessDistance;
+
+	// Hide the form
+	document.getElementById('guessForm').style.display = "none";
+
+}
+
+// TODO
+function nextRound() {
+	score = 0;
+	routeTimeInMinutes = 0;
+	randomizeLocation();
 }
 
 // routed-bike, routed-foot and routed-car services
