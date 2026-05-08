@@ -37,17 +37,59 @@ randomizeLocation();
 // This function generates a random starting point around a central location (e.g., London)
 // Later on I want it to not just be around London but also all over the world.
 // Perhaps, a way to avoid generating points in the ocean is sufficient.
-function randomizeLocation() {
-	map.setView([getRandomLatitude(), getRandomLongitude()], 13);
+async function randomizeLocation() {
+	// Coordinates for the first waypoint
+	var lat1 = getRandomLatitude();
+	var lon1 = getRandomLongitude();
+
+	// Coordinates for the second waypoint
+	var lat2 = getRandomLatitude();
+	var lon2 = getRandomLongitude();
+
+	Promise.all([
+		fetchLocationName(lat1, lon1),
+		fetchLocationName(lat2, lon2),
+	]).then((values) => {
+		console.log(values);
+		if (values.includes("error")) {
+			randomizeLocation();
+			return;
+		}
+		document.getElementById('locationInfo').innerText = "How long is the commute between " + values[0] + " and " + values[1] + "?";
+	});
+
+	// Set waypoints and "camera" position
+	var corner1 = L.latLng(lat1, lon1);
+	var corner2 = L.latLng(lat2, lon2);
+	map.fitBounds([corner1, corner2]);
 
 	control.setWaypoints([
-		L.latLng(getRandomLatitude() + (Math.random() * 0.1), getRandomLongitude() + (Math.random() * 0.1)),
-		L.latLng(getRandomLatitude() + (Math.random() * 0.1), getRandomLongitude() + (Math.random() * 0.1))
+		corner1,
+		corner2
 	]);
 
+	// Get the new route with the randomized transport mode
 	control.getRouter().options.serviceUrl = 'https://routing.openstreetmap.de/' + getRandomTransportMode() + '/route/v1';
-
 	control.route();
+}
+
+// Can be used to figure out if a waypoint is in the ocean or not.
+async function fetchLocationName(lat, lon) {
+	const response = await fetch(
+		`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`
+	);
+	const data = await response.json();
+	console.log(data);
+
+	if (Object.hasOwn(data, "error") || data.addresstype == "state") {
+		console.log("Error");
+		return "error";
+	}
+	else if (data.name != "")
+		return data.name;
+	else
+		// Fall back to the first location of display name if no name exists for location
+		return data.display_name.split(',')[0];
 }
 
 // This function will be called when the user submits their guess for the travel time.
@@ -57,25 +99,28 @@ var form = document.getElementById('guessForm');
 form.addEventListener('submit', (event) => {
 	event.preventDefault();
 
-	var userGuess = parseInt(document.getElementById('guessH').value) * 60 + parseInt(document.getElementById('guessM').value);
+	var userGuessHours = parseInt(document.getElementById('guessH').value);
+	var userGuessMinutes = parseInt(document.getElementById('guessM').value);
+	var userGuessInTotalMinutes = userGuessHours * 60 + userGuessMinutes;
 	// 5000 is max points for a guess
-	var score = maxPoints * (1 - Math.abs(userGuess - routeTimeInMinutes) / routeTimeInMinutes);
+	var score = maxPoints * (1 - Math.abs(userGuessInTotalMinutes - routeTimeInMinutes) / routeTimeInMinutes);
 	score = Math.floor(Math.max(0, score));
 
-	var guessDistance = Math.abs(routeTimeInMinutes - userGuess);
+	var guessDistance = Math.abs(routeTimeInMinutes - userGuessInTotalMinutes);
+	var formattedGuessDistance = "Your guess of " + userGuessHours + " hours and " + userGuessMinutes + " minutes";
 	if (guessDistance >= 60) {
-		var formattedGuessDistance = "You were " + Math.floor(guessDistance / 60) + " hours and " + guessDistance % 60 + " minutes away!";
+		formattedGuessDistance = formattedGuessDistance + " were " + Math.floor(guessDistance / 60) + " hours and " + guessDistance % 60 + " minutes away!";
 		displayScore(score, formattedGuessDistance);
 	}
 	else {
-		var formattedGuessDistance = "You were " + guessDistance + " minutes away!";
+		formattedGuessDistance = formattedGuessDistance + " were " + guessDistance + " minutes away!";
 		displayScore(score, formattedGuessDistance);
 	}
 })
 
+// Display the score to the user after guessing, also hiding the guess form.
 function displayScore(score, guessDistance) {
 	// Display the score
-	console.log(score);
 	document.getElementsByClassName('routing-container')[0].style.display = "block";
 	document.getElementById('scoreDisplay').style.display = "flex";
 	document.getElementById('scoreText').innerText = "You scored " + score + " points!";
@@ -83,13 +128,24 @@ function displayScore(score, guessDistance) {
 
 	// Hide the form
 	document.getElementById('guessForm').style.display = "none";
+}
 
+function hideScore() {
+	// Hide the score
+	document.getElementsByClassName('routing-container')[0].style.display = "none";
+	document.getElementById('scoreDisplay').style.display = "none";
+	document.getElementById('scoreText').innerText = "You haven't guessed yet!";
+	document.getElementById('guessDistanceText').innerText = "";
+
+	// Display the form
+	document.getElementById('guessForm').style.display = "flex";
 }
 
 // TODO
 function nextRound() {
 	score = 0;
 	routeTimeInMinutes = 0;
+	hideScore();
 	randomizeLocation();
 }
 
@@ -102,7 +158,6 @@ function getRandomTransportMode() {
 		'routed-bike': " Biking 🚴‍♂️",
 	};
 	modeOfTransport = transportModes[Math.floor(Math.random() * transportModes.length)];
-	console.log(transportModeEmojis[modeOfTransport]);
 	document.getElementById("transportmodeimgid").innerText = "Mode of transport: " + transportModeEmojis[modeOfTransport];
 	return modeOfTransport;
 }
