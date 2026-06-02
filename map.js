@@ -53,6 +53,7 @@ function randomizeLocation() {
 // This function will be called when the user submits their guess for the travel time.
 // It will compare the user's guess with the actual travel time and provide feedback.
 const maxPoints = 5000;
+var totalScore = 0; // Maybe we want to put all these variables at start
 var form = document.getElementById('guessForm');
 form.addEventListener('submit', (event) => {
 	event.preventDefault();
@@ -61,6 +62,7 @@ form.addEventListener('submit', (event) => {
 	// 5000 is max points for a guess
 	var score = maxPoints * (1 - Math.abs(userGuess - routeTimeInMinutes) / routeTimeInMinutes);
 	score = Math.floor(Math.max(0, score));
+	totalScore += score;
 
 	var guessDistance = Math.abs(routeTimeInMinutes - userGuess);
 	if (guessDistance >= 60) {
@@ -73,23 +75,34 @@ form.addEventListener('submit', (event) => {
 	}
 })
 
-function displayScore(score, guessDistance) {
+function displayScore(score, guessDistanceText) {
 	// Display the score
-	console.log(score);
 	document.getElementsByClassName('routing-container')[0].style.display = "block";
 	document.getElementById('scoreDisplay').style.display = "flex";
+	document.getElementById('totalScoreDisplay').innerText = "Total score: " + totalScore;
 	document.getElementById('scoreText').innerText = "You scored " + score + " points!";
-	document.getElementById('guessDistanceText').innerText = guessDistance;
+	document.getElementById('guessDistanceText').innerText = guessDistanceText;
 
 	// Hide the form
 	document.getElementById('guessForm').style.display = "none";
 
 }
 
-// TODO
+function hideScoreAndShowForm() {
+	document.getElementsByClassName('routing-container')[0].style.display = "none";
+	document.getElementById('scoreDisplay').style.display = "none";
+	document.getElementById('scoreText').innerText = "";
+	document.getElementById('guessDistanceText').innerText = "";
+
+	// Hide the form
+	document.getElementById('guessForm').style.display = "flex";
+
+}
+
 function nextRound() {
 	score = 0;
 	routeTimeInMinutes = 0;
+	hideScoreAndShowForm();
 	randomizeLocation();
 }
 
