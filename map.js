@@ -126,30 +126,19 @@ function displayScore(score, guessDistanceText) {
 	document.getElementById('scoreDisplay').style.display = "flex";
 	document.getElementById('totalScoreDisplay').innerText = "Total score: " + totalScore;
 	document.getElementById('scoreText').innerText = "You scored " + score + " points!";
-	document.getElementById('guessDistanceText').innerText = guessDistanceText;
+	document.getElementById('locationInfo').innerText = guessDistanceText;
 
 	// Hide the form
 	document.getElementById('guessForm').style.display = "none";
-}
-
-function hideScore() {
-	// Hide the score
-	document.getElementsByClassName('routing-container')[0].style.display = "none";
-	document.getElementById('scoreDisplay').style.display = "none";
-	document.getElementById('scoreText').innerText = "You haven't guessed yet!";
-	document.getElementById('guessDistanceText').innerText = "";
-
-	// Display the form
-	document.getElementById('guessForm').style.display = "flex";
 }
 
 function hideScoreAndShowForm() {
 	document.getElementsByClassName('routing-container')[0].style.display = "none";
 	document.getElementById('scoreDisplay').style.display = "none";
 	document.getElementById('scoreText').innerText = "";
-	document.getElementById('guessDistanceText').innerText = "";
+	document.getElementById('locationInfo').innerText = "";
 
-	// Hide the form
+	// Display the form
 	document.getElementById('guessForm').style.display = "flex";
 
 }

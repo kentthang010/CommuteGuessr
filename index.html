@@ -33,62 +33,66 @@
 		<title>CommuteGuessr</title>
 	</head>
 
-	<body style="background-color: #faf3e1">
+	<!-- <body style="background-color: #222222"> -->
+	<body style="background-color: #ca8585">
 		<div
 			class="container mx-auto flex flex-col my-auto items-center justify-center h-screen gap-1"
 		>
 			<h1 class="text-3xl font-bold">CommuteGuessr</h1>
-			<div class="w-75 h-75" id="map"></div>
-			<!-- Used for debugging -->
-			<!-- <button
-				type="button"
-				class="btn btn-primary"
-				onclick="randomizeLocation()"
-			>
-				Randomize Location
-			</button> -->
-			<p>Guess your commute time!</p>
-			<p id="totalScoreDisplay">Score: 0</p>
-			<p id="locationInfo">Guess your commute time!</p>
-			<form
-				class="flex flex-col items-center"
-				id="guessForm"
-				name="guessForm"
-			>
-				<p id="transportmodeimgid"></p>
-				<div class="flex flex-row">
-					<input
-						type="text"
-						id="guessH"
-						class="form-control"
-						placeholder="Enter your guess in hours"
-					/>
-					<input
-						type="text"
-						id="guessM"
-						class="form-control"
-						placeholder="Enter your guess in minutes"
-					/>
-				</div>
-				<input
-					type="submit"
-					class="btn btn-primary"
-					value="Submit Guess"
-				/>
-			</form>
-			<div
-				class="mx-auto flex flex-col items-center justify-center gap-1 hidden"
-				id="scoreDisplay"
-			>
-				<p id="scoreText"></p>
-				<p id="guessDistanceText"></p>
-				<button
-					type="button"
-					class="btn btn-primary"
-					onclick="nextRound()"
+			<div class="w-100 h-75" id="map"></div>
+			<div class="bg-white w-100 rounded-lg flex flex-row gap-3">
+				<div
+					class="flex flex-col flex-2 items-center justify-center text-lg text-shadow-lg font-bold text-center ps-3"
 				>
-					Next Round
-				</button>
+					<p id="locationInfo">Guess your commute time!</p>
+					<p id="transportmodeimgid"></p>
+				</div>
+				<div id="guessingbox" class="flex-1">
+					<form
+						class="flex flex-col items-center"
+						id="guessForm"
+						name="guessForm"
+					>
+						<div class="flex flex-row">
+							<input
+								type="text"
+								id="guessH"
+								class="form-control"
+								placeholder="Hours"
+							/>
+							<input
+								type="text"
+								id="guessM"
+								class="form-control"
+								placeholder="Minutes"
+							/>
+						</div>
+						<input
+							type="submit"
+							class="btn btn-primary w-100"
+							value="Submit Guess"
+						/>
+					</form>
+					<div
+						class="mx-auto flex flex-col items-center justify-center gap-1 hidden"
+						id="scoreDisplay"
+					>
+						<p id="scoreText"></p>
+						<p id="guessDistanceText"></p>
+						<button
+							type="button"
+							class="btn btn-primary w-100"
+							onclick="nextRound()"
+						>
+							Next Round
+						</button>
+					</div>
+				</div>
+				<div
+					class="flex flex-1 items-center justify-center text-xl text-shadow-lg font-bold"
+				>
+					<p id="totalScoreDisplay">Total Score: 0</p>
+				</div>
 			</div>
 		</div>
 	</body>
