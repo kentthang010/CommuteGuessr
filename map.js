@@ -13,7 +13,7 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 var control = L.Routing.control({
 	containerClassName: 'routing-container',
 	router: L.Routing.osrmv1(),
-	routeWhileDragging: true
+	draggableWaypoints: false
 }).addTo(map);
 
 var routeTimeInMinutes;
@@ -100,8 +100,8 @@ var form = document.getElementById('guessForm');
 form.addEventListener('submit', (event) => {
 	event.preventDefault();
 
-	var userGuessHours = parseInt(document.getElementById('guessH').value);
-	var userGuessMinutes = parseInt(document.getElementById('guessM').value);
+	var userGuessHours = parseInt(document.getElementById('guessH').value) || 0;
+	var userGuessMinutes = parseInt(document.getElementById('guessM').value) || 0;
 	var userGuessInTotalMinutes = userGuessHours * 60 + userGuessMinutes;
 	// 5000 is max points for a guess
 	var score = maxPoints * (1 - Math.abs(userGuessInTotalMinutes - routeTimeInMinutes) / routeTimeInMinutes);
@@ -140,7 +140,6 @@ function hideScoreAndShowForm() {
 
 	// Display the form
 	document.getElementById('guessForm').style.display = "flex";
-
 }
 
 function nextRound() {
